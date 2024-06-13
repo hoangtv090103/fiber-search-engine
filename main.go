@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fiber-search-engine/routes"
 	"fmt"
 	"log"
 	"os"
@@ -29,6 +30,8 @@ func main() {
 	app := fiber.New(fiber.Config {
 		IdleTimeout: 5 * time.Second,
 	})
+
+	routes.SetRoutes(app)
 
 	app.Use(compress.New())
 

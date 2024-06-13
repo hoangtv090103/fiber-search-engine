@@ -1,0 +1,19 @@
+package views
+
+templ template() {
+	<!DOCTYPE html>
+	<html>
+		<head>
+			<title>Template</title>
+		</head>
+		<body>
+			{ children... }
+		</body>
+	</html>
+}
+
+templ Home() {
+    @template() {
+        <div>My Homepage</div>
+    }
+}
