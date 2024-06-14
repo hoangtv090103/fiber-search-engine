@@ -24,3 +24,4 @@ This is a search engine project built with Go and the Fiber framework.
 - The application provides a search engine functionality.
 - It uses the Fiber framework for handling requests and responses.
 - It uses JWT for authentication.
+- It uses a cron job, defined in [`utills/cron.go`](utills/cron.go), to run the search engine every hour.

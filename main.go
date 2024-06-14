@@ -3,6 +3,7 @@ package main
 import (
 	"fiber-search-engine/db"
 	"fiber-search-engine/routes"
+	utils "fiber-search-engine/utills"
 	"fmt"
 	"log"
 	"os"
@@ -33,6 +34,8 @@ func main() {
 	})
 
 	routes.SetRoutes(app)
+
+	utils.StartCronJobs()
 
 	app.Use(compress.New())
 

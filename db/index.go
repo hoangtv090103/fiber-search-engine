@@ -26,7 +26,7 @@ func InitDB() {
 		panic(err)
 	}
 
-	err = DBConn.AutoMigrate(&User{}, &SearchSetting{}) 
+	err = DBConn.AutoMigrate(&User{}, &SearchSetting{}, &CrawledUrl{})
 	// AutoMigrate creates tables based on the struct/model
 	// &User{} is a pointer to the User struct/model
 	// &SearchSetting{} is a pointer to the SearchSetting struct/model
