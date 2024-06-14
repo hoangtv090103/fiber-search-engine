@@ -4,9 +4,6 @@ This is a search engine project built with Go and the Fiber framework.
 
 ## Project Structure
 
-- `.air.toml`, `.env`, `.gitignore`: Configuration files.
-- `.vscode/`: Contains settings for Visual Studio Code.
-- `.zed/`: Contains task configurations.
 - `db/`: Contains database related files like `index.go`, `search_settings.go`, `user.go`.
 - `go.mod`, `go.sum`: Go module and checksum files.
 - `main.go`: The entry point of the application.
