@@ -1,3 +1,7 @@
 .env
 /tmp
 .air.toml
+
+task.json
+.zed
+.vscode
