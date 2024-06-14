@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"fiber-search-engine/views"
+	"fiber-search-engine/db"
 
 	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
@@ -16,42 +16,15 @@ func render(c *fiber.Ctx, component templ.Component, options ...func(*templ.Comp
 	return adaptor.HTTPHandler(componentHandler)(c)
 }
 
-type loginform struct { // Lowercase means doesn't export
-	Email    string `form:"email"`
-	Password string `form:"password"`
-}
-
-type settingsform struct {
-	Amount   int  `form:"amount"`
-	SearchOn bool `form:"searchOn"`
-	AddNew   bool `form:"addNew"`
-}
-
 func SetRoutes(app *fiber.App) {
-	app.Get("/", func(c *fiber.Ctx) error {
-		return render(c, views.Home())
-	})
-	app.Post("/", func(c *fiber.Ctx) error {
-		input := settingsform{}
-		if err := c.BodyParser(&input); err != nil {
-			return c.SendString("<h2>Error: Something went wrong</h2>")
-		}
-		return c.SendStatus(200)
-	})
+	app.Get("/", AuthMiddleware, DashboardHandler)
+	app.Post("/", AuthMiddleware, DashboardPostHandler)
 
-	app.Get("/login", func(c *fiber.Ctx) error {
-		return render(c, views.Login())
-	})
-
-	app.Post("/login", func(c *fiber.Ctx) error {
-		input := loginform{}
-		if err := c.BodyParser(&input); err != nil {
-			return c.SendString("<h2>Error: Something went wrong</h2>")
-		}
-
-		if input.Email == "" || input.Password == "" {
-			return c.SendString("<h2>Error: Email or Password is empty</h2>")
-		}
-		return c.SendStatus(200)
+	app.Get("/login", LoginHandler)
+	app.Post("/login", LoginPostHandler)
+	app.Get("/create", func(c *fiber.Ctx) error {
+		u := &db.User{}
+		u.CreateAdmin()
+		return c.SendString("Admin created")
 	})
 }

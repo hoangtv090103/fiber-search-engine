@@ -9,6 +9,7 @@ templ template() {
 			<script src="https://cdn.tailwindcss.com"></script>
 			<script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
 			<script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.js" integrity="sha384-qbtR4rS9RrUMECUWDWM2+YGgN3U4V4ZncZ0BvUcg9FGct0jqXz3PUdVpU1p0yrXS" crossorigin="anonymous"></script>
+			<script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/response-targets.js"></script>
 		</head>
 		<body>
 			{ children... }
@@ -16,26 +17,26 @@ templ template() {
 	</html>
 }
 
-templ Home() {
+templ Home(amount string, searchOn bool, addNew bool) {
 	@template() {
 		<div class="flex flex-col justify-center items-center">
 			<h1 class="text-2xl py-5 text-center">Welcome to Search Setting</h1>
 			<form class="flex flex-col justify-center items-center gap-5 py-5" hx-post="/" hx-target="#feedback" hx-indicator="#indicator">
 				<label class="input input-bordered flex items-center gap-2 w-full">
 					Urls per hour:
-					<input name="amount" type="text" class="grow" placeholder="5"/>
+					<input value={ amount } name="amount" type="text" class="grow" placeholder="5"/>
 				</label>
 				<div class="flex flex-col">
 					<div class="form-control w-52">
 						<label class="cursor-pointer label">
 							<span class="label-text">Search On:</span>
-							<input name="searchOn" type="checkbox" class="toggle toggle-primary" checked/>
+							<input name="searchOn" type="checkbox" class="toggle toggle-primary" checked?={ searchOn }/>
 						</label>
 					</div>
 					<div class="form-control w-52">
 						<label class="cursor-pointer label">
 							<span class="label-text">Add new urls</span>
-							<input name="addNew" type="checkbox" class="toggle toggle-accent" checked/>
+							<input name="addNew" type="checkbox" class="toggle toggle-accent" checked?={ addNew }/>
 						</label>
 					</div>
 				</div>

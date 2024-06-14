@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fiber-search-engine/db"
 	"fiber-search-engine/routes"
 	"fmt"
 	"log"
@@ -19,7 +20,7 @@ func main() {
 	if env != nil {
 		panic("Cannot find environment variable")
 
-		}
+	}
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = ":4000"
@@ -27,7 +28,7 @@ func main() {
 		port = ":" + port
 	}
 
-	app := fiber.New(fiber.Config {
+	app := fiber.New(fiber.Config{
 		IdleTimeout: 5 * time.Second,
 	})
 
@@ -35,8 +36,10 @@ func main() {
 
 	app.Use(compress.New())
 
+	db.InitDB()
+
 	// Start out server and listen for a shutdown
-	
+
 	go func() {
 		if err := app.Listen(port); err != nil {
 			log.Panic(err)
