@@ -1,6 +1,6 @@
 package search
 
-import "coffeeintocode/search-engine/db"
+import "fiber-search-engine/db"
 
 // Index is an in-memory inverted index. It maps tokens to url IDs.
 type Index map[string][]string

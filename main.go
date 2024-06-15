@@ -1,9 +1,9 @@
 package main
 
 import (
-	"coffeeintocode/search-engine/db"
-	"coffeeintocode/search-engine/routes"
-	"coffeeintocode/search-engine/utils"
+	"fiber-search-engine/db"
+	"fiber-search-engine/routes"
+	"fiber-search-engine/utils"
 	"fmt"
 	"log"
 	"os"

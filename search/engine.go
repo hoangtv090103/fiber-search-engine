@@ -1,7 +1,7 @@
 package search
 
 import (
-	"coffeeintocode/search-engine/db"
+	"fiber-search-engine/db"
 	"fmt"
 	"time"
 )

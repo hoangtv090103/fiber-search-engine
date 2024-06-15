@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"coffeeintocode/search-engine/search"
+	"fiber-search-engine/search"
 	"fmt"
 
 	"github.com/robfig/cron/v3"

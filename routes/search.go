@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"coffeeintocode/search-engine/db"
+	"fiber-search-engine/db"
 
 	"github.com/gofiber/fiber/v2"
 )

@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"coffeeintocode/search-engine/db"
-	"coffeeintocode/search-engine/utils"
-	"coffeeintocode/search-engine/views"
+	"fiber-search-engine/db"
+	"fiber-search-engine/utils"
+	"fiber-search-engine/views"
 	"fmt"
 	"os"
 	"strconv"
