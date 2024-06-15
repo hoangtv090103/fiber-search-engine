@@ -1,70 +1,59 @@
 package search
 
 import (
-	"fiber-search-engine/db"
+	"coffeeintocode/search-engine/db"
 	"fmt"
 	"time"
 )
 
-// RunEngine starts the search engine crawl process.
-// It first retrieves the search settings and checks if the search is turned on.
-// If the search is off, it returns immediately.
-// It then retrieves the next URLs to crawl based on the amount specified in the settings.
-// For each URL, it runs a crawl and updates the URL in the database with the crawl result.
-// If the crawl is successful, it also adds the internal links found during the crawl to the newUrls slice.
-// If the AddNew setting is true, it saves all new URLs in the newUrls slice to the database.
-// It prints the number of new URLs added to the database at the end.
 func RunEngine() {
-	fmt.Println("Started search engine crawl...")
-	defer fmt.Println("Finished search engine crawl")
-
-	// Get settings
-	settings := &db.SearchSetting{}
+	fmt.Println("started search engine crawl...")
+	defer fmt.Println("search engine crawl has finished")
+	// Get crawl settings from DB
+	settings := &db.SearchSettings{}
 	err := settings.Get()
 	if err != nil {
-		fmt.Println("something went wrong getting settings")
+		fmt.Println("something went wrong getting the settings")
 		return
 	}
-	// Check if search is on
+	// Check if search is turned on by checking settings
 	if !settings.SearchOn {
-		fmt.Println("Search is turned off")
+		fmt.Println("search is turned off")
 		return
 	}
-
 	crawl := &db.CrawledUrl{}
+	// Get next X urls to be tested
 	nextUrls, err := crawl.GetNextCrawlUrls(int(settings.Amount))
-
 	if err != nil {
-		fmt.Println("something went wrong getting next urls")
+		fmt.Println("something went wrong getting the url list")
 		return
 	}
 	newUrls := []db.CrawledUrl{}
-
 	testedTime := time.Now()
-
+	// Loop over the slice and run crawl on each url
 	for _, next := range nextUrls {
 		result := runCrawl(next.Url)
+		// Check if the crawl was not successul
 		if !result.Success {
-			err := next.UpdatedUrl(db.CrawledUrl{
+			// Update row in database with the failed crawl
+			err := next.UpdateUrl(db.CrawledUrl{
 				ID:              next.ID,
 				Url:             next.Url,
 				Success:         false,
 				CrawlDuration:   result.CrawlData.CrawlTime,
 				ResponseCode:    result.ResponseCode,
-				PageTitle:       crawl.PageTitle,
+				PageTitle:       result.CrawlData.PageTitle,
 				PageDescription: result.CrawlData.PageDescription,
-				Heading:         result.CrawlData.Headings,
+				Headings:        result.CrawlData.Headings,
+				LastTested:      &testedTime,
 			})
-
 			if err != nil {
 				fmt.Println("something went wrong updating a failed url")
-				return
 			}
 			continue
 		}
-
-		// Success
-		err := next.UpdatedUrl(db.CrawledUrl{
+		// Update a successful row in database
+		err := next.UpdateUrl(db.CrawledUrl{
 			ID:              next.ID,
 			Url:             next.Url,
 			Success:         result.Success,
@@ -72,64 +61,62 @@ func RunEngine() {
 			ResponseCode:    result.ResponseCode,
 			PageTitle:       result.CrawlData.PageTitle,
 			PageDescription: result.CrawlData.PageDescription,
-			Heading:         result.CrawlData.Headings,
+			Headings:        result.CrawlData.Headings,
 			LastTested:      &testedTime,
 		})
 		if err != nil {
-			fmt.Println("something went wrong updating a successful url")
-			fmt.Println(next.Url)
+			fmt.Printf("something went wrong updating %v /n", next.Url)
 		}
-
-		for _, newUrl := range result.CrawlData.Links.Internal {
-			newUrls = append(newUrls, db.CrawledUrl{
-				Url: newUrl,
-			})
+		// Push the newly found external urls to an array
+		for _, newUrl := range result.CrawlData.Links.External {
+			newUrls = append(newUrls, db.CrawledUrl{Url: newUrl})
 		}
-	} // end of range
-
+	} // End of range
+	// Check if we should add the newly found urls to the database
 	if !settings.AddNew {
+		fmt.Printf("Adding new urls to database is disabled")
 		return
 	}
-
-	// Insert new urls
+	// Insert newly found urls into database
 	for _, newUrl := range newUrls {
 		err := newUrl.Save()
 		if err != nil {
-			fmt.Println("something went wrong saving a new url")
-			fmt.Println(newUrl.Url)
+			fmt.Printf("something went wrong adding new url to database: %v", newUrl.Url)
 		}
 	}
+	fmt.Printf("\nAdded %d new urls to database \n", len(newUrls))
 
-	fmt.Printf("\nAdded %d new urls to the database\n", len(newUrls))
 }
 
-// RunIndex starts the search engine indexing process.
-// It first retrieves all URLs that have not been indexed yet.
-// It then creates a new index and adds the not indexed URLs to it.
-// After that, it saves the index to the database.
-// Finally, it sets the indexed field to true for all the not indexed URLs.
-// If there's an error during any of these operations, it returns immediately.
 func RunIndex() {
-	fmt.Println("Started search engine index...")
-	defer fmt.Println("Finished search engine index")
-
-	crawled := &db.CrawledUrl{}              // create a new instance of the db.CrawledUrl struct
-	notIndexed, err := crawled.GetNotIndex() // get all the not indexed urls
+	fmt.Println("started search indexing...")
+	defer fmt.Println("search indexing has finished")
+	// Get index settings from DB
+	crawled := &db.CrawledUrl{}
+	// Get all urls that are not indexed
+	notIndexed, err := crawled.GetNotIndexed()
+	fmt.Println("not indexed urls: ", len(notIndexed))
 	if err != nil {
+		fmt.Println("something went wrong getting the not indexed urls")
+		return
+	}
+	// Create a new index
+	idx := make(Index)
+	// Add the not indexed urls to the index
+	idx.Add(notIndexed)
+	// Save the index to the database
+	searchIndex := &db.SearchIndex{}
+	err = searchIndex.Save(idx, notIndexed)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("something went wrong saving the index")
+		return
+	}
+	// Update the urls to be indexed=true
+	err = crawled.SetIndexedTrue(notIndexed)
+	if err != nil {
+		fmt.Println("something went wrong updating the indexed urls")
 		return
 	}
 
-	idx := make(Index)               // create a new instance of the Index map
-	idx.Add(notIndexed)              // add the notIndexed slice to the index
-	searchIndex := &db.SearchIndex{} // create a new instance of the db.SearchIndex struct
-
-	err = searchIndex.Save(idx, notIndexed) // save the index to the database
-	if err != nil {
-		return
-	}
-
-	err = crawled.SetIndexedTrue(notIndexed) // set the indexed field to true for all the not indexed urls
-	if err != nil {
-		return
-	}
 }

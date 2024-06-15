@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fiber-search-engine/db"
-	"fiber-search-engine/routes"
-	utils "fiber-search-engine/utills"
+	"coffeeintocode/search-engine/db"
+	"coffeeintocode/search-engine/routes"
+	"coffeeintocode/search-engine/utils"
 	"fmt"
 	"log"
 	"os"
@@ -19,8 +19,7 @@ import (
 func main() {
 	env := godotenv.Load()
 	if env != nil {
-		panic("Cannot find environment variable")
-
+		panic("cannot find environment variables")
 	}
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -33,16 +32,11 @@ func main() {
 		IdleTimeout: 5 * time.Second,
 	})
 
-	routes.SetRoutes(app)
-
-	utils.StartCronJobs()
-
 	app.Use(compress.New())
-
 	db.InitDB()
-
-	// Start out server and listen for a shutdown
-
+	routes.SetRoutes(app)
+	utils.StartCronJobs()
+	// Start our server and listen for a shutdown
 	go func() {
 		if err := app.Listen(port); err != nil {
 			log.Panic(err)
@@ -52,8 +46,7 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
-	<-c // Block main thread until interrupted
-
+	<-c // Block the main thread until interupted
 	app.Shutdown()
-	fmt.Println(("Shutting down server"))
+	fmt.Println("shutting down server")
 }

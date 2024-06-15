@@ -16,21 +16,19 @@ func InitDB() {
 	DBConn, err = gorm.Open(postgres.Open(dburl))
 	if err != nil {
 		fmt.Println("Failed to connect to database")
-		panic("Failed to connect to database") //panic
+		panic("Failed to connect to database")
 	}
 
-	// Enable uui-ossp extension
-	err = DBConn.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";").Error
+	// Enable uuid-ossp extension
+	err = DBConn.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error
 	if err != nil {
-		fmt.Println("can't install uuid extension")
+		fmt.Println("Failed to enable uuid-ossp extension")
 		panic(err)
 	}
 
-	err = DBConn.AutoMigrate(&User{}, &SearchSetting{}, &CrawledUrl{}, &SearchIndex{})
-	// AutoMigrate creates tables based on the struct/model
-	// &User{} is a pointer to the User struct/model
-	// &SearchSetting{} is a pointer to the SearchSetting struct/model
+	err = DBConn.AutoMigrate(&User{}, &SearchSettings{}, &CrawledUrl{}, &SearchIndex{})
 	if err != nil {
+		fmt.Println("Failed to migrate")
 		panic(err)
 	}
 }

@@ -2,27 +2,25 @@ package views
 
 templ Login() {
 	@template() {
-		<div hx-ext="response-targets" class="flex flex-col justify-center items-center">
-			//have to put hx-ext="response-targets" above the element that you want to be the target
+		<div hx-ext="response-targets" class="flex justify-center items-center">
 			<form
 				class="flex flex-col justify-center items-center gap-5 py-5"
 				hx-post="/login"
-				hx-target="#feedback" p
+				hx-target="#feedback"
+				hx-target-error="#feedback"
 				hx-indicator="#indicator"
-				hx-target-errors="#feedback"
 			>
 				<label class="input input-bordered flex items-center gap-2 w-full">
 					Email
-					<input name="email" type="text" class="grow" placeholder="user@gmail.com"/>
+					<input type="text" class="grow" name="email" placeholder="user@search.com"/>
 				</label>
 				<label class="input input-bordered flex items-center gap-2 w-full">
 					Password
-					<input name="password" type="password" class="grow" placeholder="Password"/>
+					<input type="password" class="grow" name="password" placeholder="Password"/>
 				</label>
-				<button class="btn" type="submit">Login</button>
+				<button type="submit" class="btn">Login</button>
 				<div id="indicator" class="htmx-indicator">
-					// when the request from the post is sent to the server, htmx activate whatever in here 
-					<div class="flex justify-center items-center w-full">
+					<div class="flex justifty-center items-center w-full">
 						<span class="loading loading-spinner loading-lg text-primary h-20 w-20"></span>
 					</div>
 				</div>
