@@ -6,6 +6,21 @@ import (
 	"time"
 )
 
+// RunEngine is a function that runs the web crawling engine.
+// It first prints a message that the crawl has started and defers a message that the crawl has finished.
+// It then retrieves the crawl settings from the database and checks if search is turned on.
+// If there is an error retrieving the settings or if search is turned off, it prints a message and returns.
+// The function then retrieves the next set of URLs to be crawled from the database.
+// If there is an error retrieving the URLs, it prints a message and returns.
+// The function then loops over the URLs, runs a crawl on each one, and updates the database with the results.
+// If the crawl is not successful, it updates the database with the failed crawl and continues to the next URL.
+// If the crawl is successful, it updates the database with the successful crawl and adds the newly found external URLs to a slice.
+// After all URLs have been crawled, the function checks if it should add the newly found URLs to the database.
+// If it should, it loops over the new URLs and adds each one to the database.
+// If there is an error adding a URL to the database, it prints a message.
+// Finally, the function prints a message with the number of new URLs added to the database.
+//
+// This function does not take any parameters and does not return any values.
 func RunEngine() {
 	fmt.Println("started search engine crawl...")
 	defer fmt.Println("search engine crawl has finished")
@@ -85,9 +100,19 @@ func RunEngine() {
 		}
 	}
 	fmt.Printf("\nAdded %d new urls to database \n", len(newUrls))
-
 }
 
+// RunIndex is a function that runs the search indexing process.
+// It first prints a message that the indexing has started and defers a message that the indexing has finished.
+// It then retrieves all URLs that have not been indexed from the database.
+// If there is an error retrieving the URLs, it prints a message and returns.
+// The function then creates a new index and adds the not indexed URLs to it.
+// It then saves the index to the database.
+// If there is an error saving the index, it prints a message and returns.
+// Finally, it updates the URLs in the database to be indexed=true.
+// If there is an error updating the URLs, it prints a message and returns.
+//
+// This function does not take any parameters and does not return any values.
 func RunIndex() {
 	fmt.Println("started search indexing...")
 	defer fmt.Println("search indexing has finished")

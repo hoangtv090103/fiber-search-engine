@@ -16,6 +16,14 @@ type User struct {
 	UpdatedAt time.Time  `json:"updatedAt"`
 }
 
+// CreateAdmin is a method on the User struct that creates an admin user in the database.
+// It creates a new User object with the specified email and password and sets the IsAdmin field to true.
+// It then hashes the password and saves the user to the database.
+//
+// This method does not take any parameters.
+//
+// Returns:
+// error: An error object that describes an error that occurred during the method's execution.
 func (u *User) CreateAdmin() error {
 	user := User{
 		Email:    "your email",
@@ -35,6 +43,18 @@ func (u *User) CreateAdmin() error {
 	return nil
 }
 
+// LoginAsAdmin is a method on the User struct that logs in a user as an admin.
+// It takes an email and password as input and attempts to find a user with the specified email and is_admin set to true.
+// If the user is found, it compares the password hash with the input password and returns the user if the passwords match.
+// If the user is not found or the passwords do not match, it returns an error.
+//
+// Parameters:
+// email string: The email of the user to log in.
+// password string: The password of the user to log in.
+//
+// Returns:
+// *User: A pointer to the User object representing the logged-in user.
+// error: An error object that describes an error that occurred during the method's execution.
 func (u *User) LoginAsAdmin(email string, password string) (*User, error) {
 	// Find User
 	if err := DBConn.Where("email = ? AND is_admin = ?", email, true).First(&u).Error; err != nil {

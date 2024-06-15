@@ -31,6 +31,17 @@ type Links struct {
 	External []string
 }
 
+// runCrawl is a function that performs a web crawl on a given URL.
+// It sends a GET request to the URL, checks the response for errors, and parses the body if the response is HTML.
+// If there is an error sending the request, the response is nil, the status code is not 200, or the content type is not text/html, it returns a CrawlData struct with Success set to false.
+// If the body is successfully parsed, it returns a CrawlData struct with Success set to true and the parsed data.
+// The function prints an error message and returns a CrawlData struct with Success set to false if there is an error parsing the body.
+//
+// Parameters:
+// inputUrl string: The URL to perform the web crawl on.
+//
+// Returns:
+// CrawlData: A struct containing the URL, whether the crawl was successful, the response code, and the parsed data from the body.
 func runCrawl(inputUrl string) CrawlData {
 	resp, err := http.Get(inputUrl)
 	baseUrl, _ := url.Parse(inputUrl)
@@ -62,9 +73,20 @@ func runCrawl(inputUrl string) CrawlData {
 		fmt.Println("non html response detected")
 		return CrawlData{Url: inputUrl, Success: false, ResponseCode: resp.StatusCode, CrawlData: ParsedBody{}}
 	}
-
 }
 
+// parseBody is a function that parses the body of a web page and extracts various information from it.
+// It parses the body into an HTML node tree, extracts all the links, the title and description, and the h1 headings from the tree,
+// and records the time it took to perform these operations.
+// The function returns a ParsedBody struct containing the extracted information and the time it took to extract it.
+// If there is an error parsing the body, the function prints an error message and returns an empty ParsedBody struct and the error.
+//
+// Parameters:
+// body io.Reader: The body of the web page to parse.
+// baseUrl *url.URL: The base URL of the web page to resolve relative URLs against and to compare with for determining if a link is internal or external.
+//
+// Returns:
+// ParsedBody, error: A struct containing the extracted information and the time it took to extract it, and an error object that describes an error that occurred during the function's execution.
 func parseBody(body io.Reader, baseUrl *url.URL) (ParsedBody, error) {
 	doc, err := html.Parse(body)
 	if err != nil {
@@ -92,7 +114,22 @@ func parseBody(body io.Reader, baseUrl *url.URL) (ParsedBody, error) {
 	}, nil
 }
 
+// getLinks is a function that extracts all the internal and external links from a given HTML node and its children.
 // Depth First Search (DFS) of the html tree structure. This is a recursive function to scan the full tree.
+// It uses a recursive function to traverse the HTML node tree and find all anchor tags.
+// The href attribute of each anchor tag is parsed into a URL.
+// If the URL is absolute and has the same host as the base URL, it is considered an internal link.
+// If the URL is absolute and has a different host, it is considered an external link.
+// If the URL is relative, it is resolved against the base URL and considered an internal link.
+// The function ignores URLs that are a hashtag/anchor, mail link, telephone link, javascript link, or a PDF or MD file.
+// The function returns a Links struct containing slices of internal and external links.
+//
+// Parameters:
+// node *html.Node: The root HTML node to start the search from.
+// baseUrl *url.URL: The base URL to resolve relative URLs against and to compare with for determining if a link is internal or external.
+//
+// Returns:
+// Links: A struct containing slices of internal and external links.
 func getLinks(node *html.Node, baseUrl *url.URL) Links {
 	links := Links{}
 	if node == nil {
@@ -133,13 +170,24 @@ func getLinks(node *html.Node, baseUrl *url.URL) Links {
 	return links
 }
 
+// isSameHost is a function that checks if two URLs have the same host.
+// It parses both URLs and compares their hosts.
+// If there is an error parsing either URL, it returns false.
+// If the hosts are the same, it returns true. Otherwise, it returns false.
+//
+// Parameters:
+// absoluteURL string: The first URL to compare.
+// baseURL string: The second URL to compare.
+//
+// Returns:
+// bool: True if the hosts of both URLs are the same, false otherwise.
 func isSameHost(absoluteURL string, baseURL string) bool {
-	absURL, err := url.Parse(absoluteURL)
+	absURL, err := url.Parse(absoluteURL) // Parse the absolute URL. Example: https://example.com/path => Host: example.com
 	if err != nil {
 		return false
 	}
 
-	baseURLParsed, err := url.Parse(baseURL)
+	baseURLParsed, err := url.Parse(baseURL) // Parse the base URL. Example: https://example.com/path => Host: example.com
 	if err != nil {
 		return false
 	}
@@ -147,6 +195,17 @@ func isSameHost(absoluteURL string, baseURL string) bool {
 	return absURL.Host == baseURLParsed.Host
 }
 
+// getPageData is a function that extracts the title and description from a given HTML node and its children.
+// It uses a recursive function to traverse the HTML node tree and find the title and meta elements.
+// The content of the title element and the content attribute of the meta element with name "description" are returned.
+// If the HTML node is nil, it returns two empty strings.
+// If the title element or the description meta element are not found, it returns an empty string for the respective value.
+//
+// Parameters:
+// node *html.Node: The root HTML node to start the search from.
+//
+// Returns:
+// string, string: The title and description of the page, respectively.
 func getPageData(node *html.Node) (string, string) {
 	if node == nil {
 		return "", ""
@@ -185,6 +244,17 @@ func getPageData(node *html.Node) (string, string) {
 	return title, desc
 }
 
+// getPageHeadings is a function that extracts all the h1 headings from a given HTML node and its children.
+// It uses a recursive function to traverse the HTML node tree and find all h1 elements.
+// The content of each h1 element is appended to a string, separated by commas.
+// If the HTML node is nil, it returns an empty string.
+// The function removes the last comma and space from the concatenated string before returning it.
+//
+// Parameters:
+// n *html.Node: The root HTML node to start the search from.
+//
+// Returns:
+// string: A string containing all the h1 headings, separated by commas.
 func getPageHeadings(n *html.Node) string {
 	if n == nil {
 		return ""
