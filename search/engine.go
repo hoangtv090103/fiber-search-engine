@@ -6,6 +6,14 @@ import (
 	"time"
 )
 
+// RunEngine starts the search engine crawl process.
+// It first retrieves the search settings and checks if the search is turned on.
+// If the search is off, it returns immediately.
+// It then retrieves the next URLs to crawl based on the amount specified in the settings.
+// For each URL, it runs a crawl and updates the URL in the database with the crawl result.
+// If the crawl is successful, it also adds the internal links found during the crawl to the newUrls slice.
+// If the AddNew setting is true, it saves all new URLs in the newUrls slice to the database.
+// It prints the number of new URLs added to the database at the end.
 func RunEngine() {
 	fmt.Println("Started search engine crawl...")
 	defer fmt.Println("Finished search engine crawl")
@@ -93,4 +101,35 @@ func RunEngine() {
 	}
 
 	fmt.Printf("\nAdded %d new urls to the database\n", len(newUrls))
+}
+
+// RunIndex starts the search engine indexing process.
+// It first retrieves all URLs that have not been indexed yet.
+// It then creates a new index and adds the not indexed URLs to it.
+// After that, it saves the index to the database.
+// Finally, it sets the indexed field to true for all the not indexed URLs.
+// If there's an error during any of these operations, it returns immediately.
+func RunIndex() {
+	fmt.Println("Started search engine index...")
+	defer fmt.Println("Finished search engine index")
+
+	crawled := &db.CrawledUrl{}              // create a new instance of the db.CrawledUrl struct
+	notIndexed, err := crawled.GetNotIndex() // get all the not indexed urls
+	if err != nil {
+		return
+	}
+
+	idx := make(Index)               // create a new instance of the Index map
+	idx.Add(notIndexed)              // add the notIndexed slice to the index
+	searchIndex := &db.SearchIndex{} // create a new instance of the db.SearchIndex struct
+
+	err = searchIndex.Save(idx, notIndexed) // save the index to the database
+	if err != nil {
+		return
+	}
+
+	err = crawled.SetIndexedTrue(notIndexed) // set the indexed field to true for all the not indexed urls
+	if err != nil {
+		return
+	}
 }

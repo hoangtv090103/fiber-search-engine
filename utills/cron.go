@@ -13,7 +13,8 @@ import (
 func StartCronJobs() {
 	c := cron.New()
 	// add cron jobs here
-	c.AddFunc("@every 1h", search.RunEngine)
+	c.AddFunc("@every 1h", search.RunEngine) // every hour
+	c.AddFunc("15 * * * *", search.RunIndex) // every 15 minutes 
 	c.Start()
 	croneCount := len(c.Entries())
 	fmt.Printf("setup %d cron jobs\n", croneCount)
