@@ -1,34 +1,28 @@
 # Fiber Search Engine
 
-This is a search engine project built with Go and the Fiber framework.
+This search engine is built with Go and the Fiber framework. It uses an in-memory inverted index for quick search results and a web crawler for fetching data from the web.
 
 ## Project Structure
 
-- `db/`: Contains database related files like `index.go`, `search_index.go`, `search_settings.go`, `url.go`, `user.go`.
-- `go.mod`, `go.sum`: Go module and checksum files.
+- `db/`: Contains database related files like `index.go`, `search_index.go`, `search_settings.go`, `url.go`, `user.go`. These files handle the database operations.
 - `main.go`: The entry point of the application.
-- `routes/`: Contains routing related files like `admin.go`, `routes.go`, `search.go`.
-- `search/`: Contains search engine related files like `crawler.go`, `crawler_test.go`, `engine.go`, `indexer.go`, `tokenizer.go`.
-- `tmp/`: Contains temporary files and build logs.
-- `utills/`: Contains utility files like `cron.go`, `jwt.go`.
-- `views/`: Contains view templates and related Go files.
+- `routes/`: Contains routing related files like `admin.go`, `routes.go`, `search.go`. These files handle the routing logic for the application.
+- `search/`: Contains search engine related files like `crawler.go`, `crawler_test.go`, `engine.go`, `indexer.go`, `tokenizer.go`. These files implement the search engine functionality.
+- `utils/`: Contains utility files like `cron.go`, `jwt.go`. These files provide utility functions like JWT authentication and scheduling cron jobs.
+- `views/`: Contains view templates and related Go files. These files handle the rendering of the user interface.
 
-## Implementation
+## How It Works
 
-The project is implemented in Go using the Fiber framework for handling HTTP requests and responses. It uses JWT for authentication. The search engine functionality is implemented in the `search/` directory, with a crawler for fetching data, an indexer for indexing the data, and a tokenizer for tokenizing the search queries.
+1. Crawling: The search engine starts by crawling the web. This is done by the `crawler.go` file. It fetches data from the web and extracts useful information such as the page title, description, headings, and external links.
 
-The database related operations are handled in the `db/` directory. The `routes/` directory contains the routing logic for the application.
+2. Indexing: The extracted data is then indexed by the `indexer.go` file. It creates an in-memory inverted index, which is a data structure that maps tokens (words) to the URLs where they were found. This allows for quick search results.
 
-## Setup
+3. Searching: When a search query is received, it is tokenized by the `tokenizer.go` file. The tokens are then used to search the index and return the matching URLs.
 
-1. Clone the repository.
-2. Install the dependencies with `go mod download`.
-3. Copy `.env.example` to `.env` and fill in your environment variables.
-4. Run the application with `go run main.go`.
+4. Updating: The search engine is updated every hour by a cron job defined in `cron.go`. This ensures that the search results are always up-to-date.
 
-## Usage
+5. User Interface: The user interface is rendered by the files in the `views/` directory. It provides a form for users to enter their search queries and displays the search results.
 
-- The application provides a search engine functionality.
-- It uses the Fiber framework for handling requests and responses.
-- It uses JWT for authentication.
-- It uses a cron job, defined in [`utills/cron.go`](utills/cron.go), to run the search engine every hour.
+## User Settings
+
+Users can customize their search settings through the user interface. They can set the number of URLs to be crawled per hour and choose whether to add new URLs to the database. These settings are handled by the `index.templ` file.
